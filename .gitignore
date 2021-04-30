@@ -1,0 +1,10 @@
+/venv/
+/.idea/
+/.env
+/.env.prod
+/db.sqlite3
+/media/
+*.pyc
+*__pycache/
+/src/assets/
+/src/media/
