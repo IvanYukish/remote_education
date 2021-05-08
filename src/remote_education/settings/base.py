@@ -18,17 +18,20 @@ root = environ.Path(__file__) - 4
 
 SITE_ROOT = root()
 BASE_DIR = os.path.join(SITE_ROOT, 'src')
+
+# environ configuration
 environ.Env.read_env(f'{root}/.env')
+env = environ.Env()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'schjs(bq_6^gb4owp+6gs!ne+u#4dk%+@dy9l+*#nf2r5ra5f*'
+SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 
-DEBUG = os.environ.get('DEBUG', default=True)
+DEBUG = env.bool('DEBUG', default=True)
 
 ALLOWED_HOSTS = [os.environ.get('ALLOWED_HOSTS', default='*')]
 
@@ -58,7 +61,7 @@ ROOT_URLCONF = 'remote_education.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR + '/templates'],
+        'DIRS': [BASE_DIR + 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
