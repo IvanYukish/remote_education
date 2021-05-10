@@ -35,6 +35,7 @@ DEBUG = env.bool('DEBUG', default=True)
 
 ALLOWED_HOSTS = [os.environ.get('ALLOWED_HOSTS', default='*')]
 
+AUTH_USER_MODEL = 'user.CustomUser'
 # Application definition
 
 INSTALLED_APPS = [
@@ -44,6 +45,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'user',
+    'core',
+    'django.contrib.sites',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
 ]
 
 MIDDLEWARE = [
@@ -61,7 +70,7 @@ ROOT_URLCONF = 'remote_education.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR + 'templates'],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -73,6 +82,14 @@ TEMPLATES = [
         },
     },
 ]
+
+AUTHENTICATION_BACKENDS = [
+    'user.backends.EmailBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
+SITE_ID = env('SITE_ID', default=1)
+
 
 WSGI_APPLICATION = 'remote_education.wsgi.application'
 
@@ -109,10 +126,23 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+        }
+    }
+}
+
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
+# LANGUAGE_CODE = 'uk'
 
 TIME_ZONE = 'UTC'
 
@@ -125,7 +155,6 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
-# AUTH_USER_MODEL = 'user.CustomUser'
 STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
@@ -140,6 +169,30 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'assets')
 STATIC_URL = '/static/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
+
+UPLOAD_TO_PATHS = {
+    'CustomUser': 'upload_images/avatars/%Y/%m/%d/',
+}
+# allauth settings
+ACCOUNT_FORMS = {
+    'signup': 'user.forms.CustomSignupForm',
+}
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+ACCOUNT_USERNAME_REQUIRED = False
+
+LOGIN_REDIRECT_URL = '/user/profile/'
+LOGIN_URL = '/user/login/'
+
+# ACCOUNT_ADAPTER = 'user.adapter.MyAccountAdapter'
+
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'iwan.jukisch@gmail.com'
+EMAIL_HOST_PASSWORD = 'armahedon2468N'
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
