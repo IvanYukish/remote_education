@@ -2,19 +2,21 @@ from allauth.account.forms import SignupForm
 from django import forms
 from django.utils.translation import ugettext_lazy as _
 from .models import CustomUser
+from .constants import USER_TYPE_CHOICES
 
-
-GEEKS_CHOICES = (
-    ("1", "Student"),
-    ("2", "Teacher"),
-)
 
 class CustomSignupForm(SignupForm):
     first_name = forms.CharField(label=_('Ім\'я'), max_length=150,
                                  widget=forms.TextInput(attrs={'placeholder': _('Введіть своє ім\'я')}))
     last_name = forms.CharField(label=_('Last Name'), max_length=150,
                                 widget=forms.TextInput(attrs={'placeholder': _('Введіть своє прізвище')}))
-    user_role = forms.ChoiceField(choices=GEEKS_CHOICES)
+    type = forms.ChoiceField(label=_('Тип'), choices=USER_TYPE_CHOICES)
+
+    def save(self, request):
+        user = super().save(request)
+        user.type = self.cleaned_data['type']
+        user.save()
+        return user
 
 
 class ProfileUpdateForm(forms.ModelForm):
