@@ -10,6 +10,11 @@ from .utils import path_and_rename
 from .validators import phone_validator
 
 
+class Teatcer(AbstractUser):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=100)
+    type = models.CharField(choices=USER_TYPE_CHOICES, max_length=25)
+
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None):
         """
