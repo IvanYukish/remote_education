@@ -1,6 +1,6 @@
 from django.urls import path, include
-from .views import LectureList
+from .views import LectureCreate
 
 urlpatterns = [
-    path('lecture/', LectureList, name='lecture')
+    path('lecture/', LectureCreate.as_view(), name='lecture')
 ]
