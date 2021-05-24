@@ -1,4 +1,8 @@
 from django.utils.translation import ugettext_lazy as _
 
-USER_TYPE_CHOICES = [('teacher', _('Викладач')), ('student', _('Студент'))]
+
+TEACHER = 'teacher'
+STUDENT = 'student'
+
+USER_TYPE_CHOICES = [(TEACHER, _('Викладач')), (STUDENT, _('Студент'))]
 

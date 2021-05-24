@@ -19,11 +19,14 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 
+from core.views import TestPage
+
 urlpatterns = [
     path('', include('allauth.urls')),
     path('admin/', admin.site.urls),
     path('user/', include('user.urls')),
-    path('core/', include('core.urls')),
+    path('', include('core.urls')),
+    path('test/', TestPage.as_view(), name='test_page')
 ]
 
 if settings.DEBUG:
