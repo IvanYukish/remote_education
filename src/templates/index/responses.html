@@ -1,6 +1,6 @@
 {% extends 'index/layout.html' %}
 {% load static %}
-{% block title %}{{form.title}}'s response ~ Google Forms CLONE{% endblock %}
+{% block title %}{{form.title}}'s response ~ Remote education{% endblock %}
 {% block script %}
 <script src="{% static 'index/responses.js' %}" defer></script>
 <script src="{% static 'lib/cookie.min.js' %}"></script>
@@ -9,7 +9,7 @@
 <div class="container-fluid">
     <div class="form-topnav">
         <a href = "/">
-            <img src = "{% static 'Icon/icon.png' %}" alt = "Google Forms Icon(CLONE)" class="navbar-icon form-icon" title = "Forms" />
+            <img src = "{% static 'Icon/icon.png' %}" alt = "Remote education" class="navbar-icon form-icon" title = "Forms" />
         </a>
         <span class="nav-text nav-form-title input-form-title">{{form.title}}</span>
         <div class="float-right">

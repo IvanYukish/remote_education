@@ -1,6 +1,6 @@
 {% extends 'index/layout.html' %}
 {% block title %}
-{{form.title}} ~ Google Forms CLONE
+{{form.title}} ~ Remote education
 {% endblock %}
 {% load static %}
 {% block script %}
@@ -11,7 +11,7 @@
 <div class = "container-fluid">
     <div class="form-topnav">
         <a href = "/">
-            <img src = "{% static 'Icon/icon.png' %}" alt = "Google Forms Icon(CLONE)" class="navbar-icon form-icon" title = "Forms" />
+            <img src = "{% static 'Icon/icon.png' %}" alt = "Remote education" class="navbar-icon form-icon" title = "Forms" />
         </a>
         <input class="nav-text nav-form-title edit-on-click input-form-title" value  = "{{form.title}}" type="text">
         <div class="float-right">
@@ -59,7 +59,6 @@
             <input type="text" data-id="{{question.id}}" class="question-title edit-on-click input-question" value="{{question.question}}">
             <select class="question-type-select input-question-type" data-id="{{question.id}}" data-origin_type = "{{question.question_type}}">
                 <option value="short" {% if question.question_type == "short" %}selected{% endif %}>Short answer</option>
-                <option value="paragraph" {% if question.question_type == "paragraph" %}selected{% endif %}>Paragraph</option>
                 <option value="multiple choice" {% if question.question_type == "multiple choice" %}selected{% endif %}>Multiple choice</option>
                 <option value="checkbox" {% if question.question_type == "checkbox" %}selected{% endif %}>Checkbox</option>
             </select>
