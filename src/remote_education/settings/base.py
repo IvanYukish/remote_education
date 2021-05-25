@@ -48,6 +48,7 @@ INSTALLED_APPS = [
 
     'user',
     'core',
+    'testbase',
     'widget_tweaks',
     'django.contrib.sites',
     'allauth',

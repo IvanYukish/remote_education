@@ -26,7 +26,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('user/', include('user.urls')),
     path('', include('core.urls')),
-    path('test/', TestPage.as_view(), name='test_page')
+    path('', include('testbase.urls')),
+    path('testpage/', TestPage.as_view(), name='test_page'),
 ]
 
 if settings.DEBUG:

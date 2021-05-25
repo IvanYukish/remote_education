@@ -171,8 +171,8 @@ class TestCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super(TestCreateView, self).get_context_data(**kwargs)
-        context['test_item_formset'] = TestItemFormSet()
-        context['option_formset'] = AnswerOptionsFormSet()
+        context['test_item_formset'] = TestItemFormSet(auto_id='id_item_%s')
+        context['option_formset'] = AnswerOptionsFormSet(auto_id='id_option_%s')
         return context
 
 
@@ -180,9 +180,9 @@ class TestListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     model = TestBase
 
     def test_func(self):
-        pass
+        return 1
 
 
 class TestDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     def test_func(self):
-        pass
+        return 1
