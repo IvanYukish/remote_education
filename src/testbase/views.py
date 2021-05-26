@@ -405,7 +405,8 @@ def edit_score(request, code):
             else:
                 question = question[0]
             score = data["score"]
-            if score == "": score = 0
+            if score == "":
+                score = 0
             question.score = score
             question.save()
             return JsonResponse({"message": "Success"})

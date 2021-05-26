@@ -1,19 +1,17 @@
 import datetime
 
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.shortcuts import redirect
-from django.urls import reverse, reverse_lazy
-from django.views.generic import TemplateView, DeleteView, UpdateView, CreateView, ListView, DetailView
+from django.urls import reverse_lazy
+from django.views.generic import TemplateView, DeleteView, UpdateView, CreateView, ListView, DetailView, RedirectView
 
-from core.forms import LectureForm, PracticalLessonForm, TestItemFormSet, AnswerOptionsFormSet, TestBaseForm
-from core.models import Lecture, PracticalLesson, TestBase
+from core.forms import LectureForm, PracticalLessonForm
+from core.models import Lecture, PracticalLesson
 from core.utils import prepare_date_time_field
 from user.constants import TEACHER
 
 
-class HomeView(TemplateView):
-    def get(self, request, *args, **kwargs):
-        return redirect(reverse('account_login'))
+class HomeView(RedirectView):
+    url = reverse_lazy('index')
 
 
 class TestPage(TemplateView):
@@ -158,31 +156,3 @@ class PracticalLessonDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteV
 
     def test_func(self):
         return self.request.user == self.get_object().user
-
-
-# TODO make tests
-class TestCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
-    model = TestBase
-    form_class = TestBaseForm
-    template_name = 'core/test/base_test_create.html'
-
-    def test_func(self):
-        return self.request.user.type == TEACHER
-
-    def get_context_data(self, **kwargs):
-        context = super(TestCreateView, self).get_context_data(**kwargs)
-        context['test_item_formset'] = TestItemFormSet(auto_id='id_item_%s')
-        context['option_formset'] = AnswerOptionsFormSet(auto_id='id_option_%s')
-        return context
-
-
-class TestListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
-    model = TestBase
-
-    def test_func(self):
-        return 1
-
-
-class TestDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
-    def test_func(self):
-        return 1

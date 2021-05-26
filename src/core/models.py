@@ -1,8 +1,6 @@
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 
-
-from core.constants import TEST_TYPE_CHOICES
 from user.models import CustomUser
 
 
@@ -29,28 +27,3 @@ class TaskSolving(models.Model):
 
 class Lecture(Lesson):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='lecture')
-
-
-class TestBase(models.Model):
-    created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='lesson_created_by')
-    passed_by = ArrayField(models.UUIDField())
-    name = models.CharField(max_length=100)
-    duration = models.DurationField()
-
-
-class TestEstimationByType(models.Model):
-    type = models.CharField(max_length=50, choices=TEST_TYPE_CHOICES)
-    size = models.PositiveIntegerField()
-    estimation = models.PositiveIntegerField()
-    test_base = models.ForeignKey(TestBase, on_delete=models.CASCADE, related_name='estimation')
-
-
-class TestItem(models.Model):
-    type = models.CharField(max_length=50, choices=TEST_TYPE_CHOICES)
-    test_base = models.ForeignKey(TestBase, on_delete=models.CASCADE, related_name='item')
-
-
-class AnswerOptions(models.Model):
-    name = models.CharField(max_length=300)
-    test_item = models.ForeignKey(TestItem, on_delete=models.CASCADE, related_name='answer')
-    correct = models.BooleanField()

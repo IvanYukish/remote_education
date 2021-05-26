@@ -2,7 +2,7 @@ from django.urls import path
 
 from core.views import HomeView, LectureCreateView, LectureDeleteView, LectureListView, LectureUpdateView, \
     PracticalLessonCreateView, PracticalLessonUpdateView, PracticalLessonDeleteView, PracticalLessonListView, \
-    LectureDetailView, TestCreateView, TestDetailView, TestListView
+    LectureDetailView
 
 urlpatterns = [
     path('', HomeView.as_view(), name='home'),
@@ -16,9 +16,4 @@ urlpatterns = [
     path('p-lessons/create', PracticalLessonCreateView.as_view(), name='p-lessons-create'),
     path('p-lessons/<int:pk>/update', PracticalLessonUpdateView.as_view(), name='p-lessons-update'),
     path('p-lessons/<int:pk>/delete', PracticalLessonDeleteView.as_view(), name='p-lessons-delete'),
-
-    path('tests/', TestListView.as_view(), name='tests-list'),
-    path('tests/create', TestCreateView.as_view(), name='tests-create'),
-    path('tests/<int:pk>/', TestDetailView.as_view(), name='tests-detail'),
-
 ]

@@ -24,7 +24,6 @@ class Answer(models.Model):
     answer_to = models.ForeignKey(Questions, on_delete=models.CASCADE, related_name="answer_to")
 
 
-
 class Form(models.Model):
     code = models.CharField(max_length=30)
     title = models.CharField(max_length=200)
