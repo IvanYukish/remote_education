@@ -486,7 +486,6 @@ document.addEventListener("DOMContentLoaded", () => {
             <input type="text" data-id="${result["question"].id}" class="question-title edit-on-click input-question" value="${result["question"].question}">
             <select class="question-type-select input-question-type" data-id="${result["question"].id}" data-origin_type = "${result["question"].question_type}">
                 <option value="short">Short answer</option>
-                <option value="paragraph">Paragraph</option>
                 <option value="multiple choice" selected>Multiple choice</option>
                 <option value="checkbox">Checkbox</option>
             </select>

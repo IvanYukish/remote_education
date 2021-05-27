@@ -2,6 +2,7 @@ import json
 import random
 import string
 
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
@@ -9,24 +10,23 @@ from django.urls import reverse
 from .models import Choices, Questions, Answer, Form, Responses
 
 
+@login_required
 def index(request):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('login'))
     forms = Form.objects.filter(creator=request.user)
     return render(request, "index/index.html", {
         "forms": forms
     })
 
 
+@login_required
 def create_form(request):
-    # Creator must be authenticated
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse("login"))
+    if request.user.type != 'teacher':
+        return HttpResponseRedirect(reverse("403"))
     # Create a blank form API
     if request.method == "POST":
         data = json.loads(request.body)
         title = data["title"]
-        code = ''.join(random.choice(string.ascii_letters + string.digits) for x in range(30))
+        code = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(30))
         choices = Choices(choice="Option 1")
         choices.save()
         question = Questions(question_type="multiple choice", question="Untitled Question", required=False)
@@ -40,165 +40,157 @@ def create_form(request):
         return JsonResponse({"message": "Sucess", "code": code})
 
 
+@login_required
 def edit_form(request, code):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse("login"))
-    formInfo = Form.objects.filter(code=code)
+    form_info = Form.objects.filter(code=code)
     # Checking if form exists
-    if formInfo.count() == 0:
+    if form_info.count() == 0:
         return HttpResponseRedirect(reverse("404"))
     else:
-        formInfo = formInfo[0]
+        form_info = form_info[0]
     # Checking if form creator is user
-    if formInfo.creator != request.user:
+    if form_info.creator != request.user:
         return HttpResponseRedirect(reverse("403"))
     return render(request, "index/form.html", {
         "code": code,
-        "form": formInfo
+        "form": form_info
     })
 
 
+@login_required
 def edit_title(request, code):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse("login"))
-    formInfo = Form.objects.filter(code=code)
+    form_info = Form.objects.filter(code=code)
     # Checking if form exists
-    if formInfo.count() == 0:
+    if form_info.count() == 0:
         return HttpResponseRedirect(reverse("404"))
     else:
-        formInfo = formInfo[0]
+        form_info = form_info[0]
     # Checking if form creator is user
-    if formInfo.creator != request.user:
+    if form_info.creator != request.user:
         return HttpResponseRedirect(reverse("403"))
     if request.method == "POST":
         data = json.loads(request.body)
         if len(data["title"]) > 0:
-            formInfo.title = data["title"]
-            formInfo.save()
+            form_info.title = data["title"]
+            form_info.save()
         else:
-            formInfo.title = formInfo.title[0]
-            formInfo.save()
-        return JsonResponse({"message": "Success", "title": formInfo.title})
+            form_info.title = form_info.title[0]
+            form_info.save()
+        return JsonResponse({"message": "Success", "title": form_info.title})
 
 
+@login_required
 def edit_description(request, code):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse("login"))
-    formInfo = Form.objects.filter(code=code)
+    form_info = Form.objects.filter(code=code)
     # Checking if form exists
-    if formInfo.count() == 0:
+    if form_info.count() == 0:
         return HttpResponseRedirect(reverse("404"))
     else:
-        formInfo = formInfo[0]
+        form_info = form_info[0]
     # Checking if form creator is user
-    if formInfo.creator != request.user:
+    if form_info.creator != request.user:
         return HttpResponseRedirect(reverse("403"))
     if request.method == "POST":
         data = json.loads(request.body)
-        formInfo.description = data["description"]
-        formInfo.save()
-        return JsonResponse({"message": "Success", "description": formInfo.description})
+        form_info.description = data["description"]
+        form_info.save()
+        return JsonResponse({"message": "Success", "description": form_info.description})
 
 
+@login_required
 def edit_bg_color(request, code):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse("login"))
-    formInfo = Form.objects.filter(code=code)
+    form_info = Form.objects.filter(code=code)
     # Checking if form exists
-    if formInfo.count() == 0:
+    if form_info.count() == 0:
         return HttpResponseRedirect(reverse("404"))
     else:
-        formInfo = formInfo[0]
+        form_info = form_info[0]
     # Checking if form creator is user
-    if formInfo.creator != request.user:
+    if form_info.creator != request.user:
         return HttpResponseRedirect(reverse("403"))
     if request.method == "POST":
         data = json.loads(request.body)
-        formInfo.background_color = data["bgColor"]
-        formInfo.save()
-        return JsonResponse({"message": "Success", "bgColor": formInfo.background_color})
+        form_info.background_color = data["bgColor"]
+        form_info.save()
+        return JsonResponse({"message": "Success", "bgColor": form_info.background_color})
 
 
+@login_required
 def edit_text_color(request, code):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse("login"))
-    formInfo = Form.objects.filter(code=code)
+    form_info = Form.objects.filter(code=code)
     # Checking if form exists
-    if formInfo.count() == 0:
+    if form_info.count() == 0:
         return HttpResponseRedirect(reverse("404"))
     else:
-        formInfo = formInfo[0]
+        form_info = form_info[0]
     # Checking if form creator is user
-    if formInfo.creator != request.user:
+    if form_info.creator != request.user:
         return HttpResponseRedirect(reverse("403"))
     if request.method == "POST":
         data = json.loads(request.body)
-        formInfo.text_color = data["textColor"]
-        formInfo.save()
-        return JsonResponse({"message": "Success", "textColor": formInfo.text_color})
+        form_info.text_color = data["textColor"]
+        form_info.save()
+        return JsonResponse({"message": "Success", "textColor": form_info.text_color})
 
 
+@login_required
 def edit_setting(request, code):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse("login"))
-    formInfo = Form.objects.filter(code=code)
+    form_info = Form.objects.filter(code=code)
     # Checking if form exists
-    if formInfo.count() == 0:
+    if form_info.count() == 0:
         return HttpResponseRedirect(reverse("404"))
     else:
-        formInfo = formInfo[0]
+        form_info = form_info[0]
     # Checking if form creator is user
-    if formInfo.creator != request.user:
+    if form_info.creator != request.user:
         return HttpResponseRedirect(reverse("403"))
     if request.method == "POST":
         data = json.loads(request.body)
-        formInfo.collect_email = data["collect_email"]
-        formInfo.is_quiz = data["is_quiz"]
-        formInfo.authenticated_responder = data["authenticated_responder"]
-        formInfo.confirmation_message = data["confirmation_message"]
-        formInfo.edit_after_submit = data["edit_after_submit"]
-        formInfo.allow_view_score = data["allow_view_score"]
-        formInfo.save()
+        form_info.collect_email = data["collect_email"]
+        form_info.is_quiz = data["is_quiz"]
+        form_info.authenticated_responder = data["authenticated_responder"]
+        form_info.confirmation_message = data["confirmation_message"]
+        form_info.edit_after_submit = data["edit_after_submit"]
+        form_info.allow_view_score = data["allow_view_score"]
+        form_info.save()
         return JsonResponse({'message': "Success"})
 
 
+@login_required
 def delete_form(request, code):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse("login"))
-    formInfo = Form.objects.filter(code=code)
+    form_info = Form.objects.filter(code=code)
     # Checking if form exists
-    if formInfo.count() == 0:
+    if form_info.count() == 0:
         return HttpResponseRedirect(reverse("404"))
     else:
-        formInfo = formInfo[0]
+        form_info = form_info[0]
     # Checking if form creator is user
-    if formInfo.creator != request.user:
+    if form_info.creator != request.user:
         return HttpResponseRedirect(reverse("403"))
     if request.method == "DELETE":
         # Delete all questions and choices
-        for i in formInfo.questions.all():
+        for i in form_info.questions.all():
             for j in i.choices.all():
                 j.delete()
             i.delete()
-        for i in Responses.objects.filter(response_to=formInfo):
+        for i in Responses.objects.filter(response_to=form_info):
             for j in i.response.all():
                 j.delete()
             i.delete()
-        formInfo.delete()
+        form_info.delete()
         return JsonResponse({'message': "Success"})
 
 
+@login_required
 def edit_question(request, code):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse("login"))
-    formInfo = Form.objects.filter(code=code)
+    form_info = Form.objects.filter(code=code)
     # Checking if form exists
-    if formInfo.count() == 0:
+    if form_info.count() == 0:
         return HttpResponseRedirect(reverse('404'))
     else:
-        formInfo = formInfo[0]
+        form_info = form_info[0]
     # Checking if form creator is user
-    if formInfo.creator != request.user:
+    if form_info.creator != request.user:
         return HttpResponseRedirect(reverse("403"))
     if request.method == "POST":
         data = json.loads(request.body)
@@ -211,23 +203,24 @@ def edit_question(request, code):
         question.question = data["question"]
         question.question_type = data["question_type"]
         question.required = data["required"]
-        if (data.get("score")): question.score = data["score"]
-        if (data.get("answer_key")): question.answer_key = data["answer_key"]
+        if data.get("score"):
+            question.score = data["score"]
+        if data.get("answer_key"):
+            question.answer_key = data["answer_key"]
         question.save()
         return JsonResponse({'message': "Success"})
 
 
+@login_required
 def edit_choice(request, code):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse("login"))
-    formInfo = Form.objects.filter(code=code)
+    form_info = Form.objects.filter(code=code)
     # Checking if form exists
-    if formInfo.count() == 0:
+    if form_info.count() == 0:
         return HttpResponseRedirect(reverse('404'))
     else:
-        formInfo = formInfo[0]
+        form_info = form_info[0]
     # Checking if form creator is user
-    if formInfo.creator != request.user:
+    if form_info.creator != request.user:
         return HttpResponseRedirect(reverse("403"))
     if request.method == "POST":
         data = json.loads(request.body)
@@ -238,43 +231,42 @@ def edit_choice(request, code):
         else:
             choice = choice[0]
         choice.choice = data["choice"]
-        if (data.get('is_answer')): choice.is_answer = data["is_answer"]
+        if data.get('is_answer'):
+            choice.is_answer = data["is_answer"]
         choice.save()
         return JsonResponse({'message': "Success"})
 
 
+@login_required
 def add_choice(request, code):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse("login"))
-    formInfo = Form.objects.filter(code=code)
+    form_info = Form.objects.filter(code=code)
     # Checking if form exists
-    if formInfo.count() == 0:
+    if form_info.count() == 0:
         return HttpResponseRedirect(reverse('404'))
     else:
-        formInfo = formInfo[0]
+        form_info = form_info[0]
     # Checking if form creator is user
-    if formInfo.creator != request.user:
+    if form_info.creator != request.user:
         return HttpResponseRedirect(reverse("403"))
     if request.method == "POST":
         data = json.loads(request.body)
         choice = Choices(choice="Option")
         choice.save()
-        formInfo.questions.get(pk=data["question"]).choices.add(choice)
-        formInfo.save()
+        form_info.questions.get(pk=data["question"]).choices.add(choice)
+        form_info.save()
         return JsonResponse({"message": "Success", "choice": choice.choice, "id": choice.id})
 
 
+@login_required
 def remove_choice(request, code):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse("login"))
-    formInfo = Form.objects.filter(code=code)
+    form_info = Form.objects.filter(code=code)
     # Checking if form exists
-    if formInfo.count() == 0:
+    if form_info.count() == 0:
         return HttpResponseRedirect(reverse('404'))
     else:
-        formInfo = formInfo[0]
+        form_info = form_info[0]
     # Checking if form creator is user
-    if formInfo.creator != request.user:
+    if form_info.creator != request.user:
         return HttpResponseRedirect(reverse("403"))
     if request.method == "POST":
         data = json.loads(request.body)
@@ -287,17 +279,16 @@ def remove_choice(request, code):
         return JsonResponse({"message": "Success"})
 
 
+@login_required
 def get_choice(request, code, question):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse("login"))
-    formInfo = Form.objects.filter(code=code)
+    form_info = Form.objects.filter(code=code)
     # Checking if form exists
-    if formInfo.count() == 0:
+    if form_info.count() == 0:
         return HttpResponseRedirect(reverse('404'))
     else:
-        formInfo = formInfo[0]
+        form_info = form_info[0]
     # Checking if form creator is user
-    if formInfo.creator != request.user:
+    if form_info.creator != request.user:
         return HttpResponseRedirect(reverse("403"))
     if request.method == "GET":
         question = Questions.objects.filter(id=question)
@@ -311,17 +302,16 @@ def get_choice(request, code, question):
                              "question_id": question.id})
 
 
+@login_required
 def add_question(request, code):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse("login"))
-    formInfo = Form.objects.filter(code=code)
+    form_info = Form.objects.filter(code=code)
     # Checking if form exists
-    if formInfo.count() == 0:
+    if form_info.count() == 0:
         return HttpResponseRedirect(reverse('404'))
     else:
-        formInfo = formInfo[0]
+        form_info = form_info[0]
     # Checking if form creator is user
-    if formInfo.creator != request.user:
+    if form_info.creator != request.user:
         return HttpResponseRedirect(reverse("403"))
     if request.method == "POST":
         choices = Choices(choice="Option 1")
@@ -330,24 +320,23 @@ def add_question(request, code):
         question.save()
         question.choices.add(choices)
         question.save()
-        formInfo.questions.add(question)
-        formInfo.save()
+        form_info.questions.add(question)
+        form_info.save()
         return JsonResponse({'question': {'question': "Untitled Question", "question_type": "multiple choice",
                                           "required": False, "id": question.id},
                              "choices": {"choice": "Option 1", "is_answer": False, 'id': choices.id}})
 
 
+@login_required
 def delete_question(request, code, question):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse("login"))
-    formInfo = Form.objects.filter(code=code)
+    form_info = Form.objects.filter(code=code)
     # Checking if form exists
-    if formInfo.count() == 0:
+    if form_info.count() == 0:
         return HttpResponseRedirect(reverse('404'))
     else:
-        formInfo = formInfo[0]
+        form_info = form_info[0]
     # Checking if form creator is user
-    if formInfo.creator != request.user:
+    if form_info.creator != request.user:
         return HttpResponseRedirect(reverse("403"))
     if request.method == "DELETE":
         question = Questions.objects.filter(id=question)
@@ -361,45 +350,43 @@ def delete_question(request, code, question):
         return JsonResponse({"message": "Success"})
 
 
+@login_required
 def score(request, code):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse("login"))
-    formInfo = Form.objects.filter(code=code)
+    form_info = Form.objects.filter(code=code)
     # Checking if form exists
-    if formInfo.count() == 0:
+    if form_info.count() == 0:
         return HttpResponseRedirect(reverse('404'))
     else:
-        formInfo = formInfo[0]
+        form_info = form_info[0]
     # Checking if form creator is user
-    if formInfo.creator != request.user:
+    if form_info.creator != request.user:
         return HttpResponseRedirect(reverse("403"))
-    if not formInfo.is_quiz:
+    if not form_info.is_quiz:
         return HttpResponseRedirect(reverse("edit_form", args=[code]))
     else:
         return render(request, "index/score.html", {
-            "form": formInfo
+            "form": form_info
         })
 
 
+@login_required
 def edit_score(request, code):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse("login"))
-    formInfo = Form.objects.filter(code=code)
+    form_info = Form.objects.filter(code=code)
     # Checking if form exists
-    if formInfo.count() == 0:
+    if form_info.count() == 0:
         return HttpResponseRedirect(reverse('404'))
     else:
-        formInfo = formInfo[0]
+        form_info = form_info[0]
     # Checking if form creator is user
-    if formInfo.creator != request.user:
+    if form_info.creator != request.user:
         return HttpResponseRedirect(reverse("403"))
-    if not formInfo.is_quiz:
+    if not form_info.is_quiz:
         return HttpResponseRedirect(reverse("edit_form", args=[code]))
     else:
         if request.method == "POST":
             data = json.loads(request.body)
             question_id = data["question_id"]
-            question = formInfo.questions.filter(id=question_id)
+            question = form_info.questions.filter(id=question_id)
             if question.count() == 0:
                 return HttpResponseRedirect(reverse("edit_form", args=[code]))
             else:
@@ -412,19 +399,18 @@ def edit_score(request, code):
             return JsonResponse({"message": "Success"})
 
 
+@login_required
 def answer_key(request, code):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse("login"))
-    formInfo = Form.objects.filter(code=code)
+    form_info = Form.objects.filter(code=code)
     # Checking if form exists
-    if formInfo.count() == 0:
+    if form_info.count() == 0:
         return HttpResponseRedirect(reverse('404'))
     else:
-        formInfo = formInfo[0]
+        form_info = form_info[0]
     # Checking if form creator is user
-    if formInfo.creator != request.user:
+    if form_info.creator != request.user:
         return HttpResponseRedirect(reverse("403"))
-    if not formInfo.is_quiz:
+    if not form_info.is_quiz:
         return HttpResponseRedirect(reverse("edit_form", args=[code]))
     else:
         if request.method == "POST":
@@ -454,41 +440,40 @@ def answer_key(request, code):
             return JsonResponse({'message': "Success"})
 
 
+@login_required
 def feedback(request, code):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse("login"))
-    formInfo = Form.objects.filter(code=code)
+    form_info = Form.objects.filter(code=code)
     # Checking if form exists
-    if formInfo.count() == 0:
+    if form_info.count() == 0:
         return HttpResponseRedirect(reverse('404'))
     else:
-        formInfo = formInfo[0]
+        form_info = form_info[0]
     # Checking if form creator is user
-    if formInfo.creator != request.user:
+    if form_info.creator != request.user:
         return HttpResponseRedirect(reverse("403"))
-    if not formInfo.is_quiz:
+    if not form_info.is_quiz:
         return HttpResponseRedirect(reverse("edit_form", args=[code]))
     else:
         if request.method == "POST":
             data = json.loads(request.body)
-            question = formInfo.questions.get(id=data["question_id"])
+            question = form_info.questions.get(id=data["question_id"])
             question.feedback = data["feedback"]
             question.save()
             return JsonResponse({'message': "Success"})
 
 
 def view_form(request, code):
-    formInfo = Form.objects.filter(code=code)
+    form_info = Form.objects.filter(code=code)
     # Checking if form exists
-    if formInfo.count() == 0:
+    if form_info.count() == 0:
         return HttpResponseRedirect(reverse('404'))
     else:
-        formInfo = formInfo[0]
-    if formInfo.authenticated_responder:
+        form_info = form_info[0]
+    if form_info.authenticated_responder:
         if not request.user.is_authenticated:
-            return HttpResponseRedirect(reverse("login"))
+            return HttpResponseRedirect(reverse("account_login"))
     return render(request, "index/view_form.html", {
-        "form": formInfo
+        "form": form_info
     })
 
 
@@ -502,134 +487,135 @@ def get_client_ip(request):
 
 
 def submit_form(request, code):
-    formInfo = Form.objects.filter(code=code)
+    form_info = Form.objects.filter(code=code)
     # Checking if form exists
-    if formInfo.count() == 0:
+    if form_info.count() == 0:
         return HttpResponseRedirect(reverse('404'))
     else:
-        formInfo = formInfo[0]
-    if formInfo.authenticated_responder:
+        form_info = form_info[0]
+    if form_info.authenticated_responder:
         if not request.user.is_authenticated:
-            return HttpResponseRedirect(reverse("login"))
+            return HttpResponseRedirect(reverse("account_login"))
     if request.method == "POST":
         code = ''.join(random.choice(string.ascii_letters + string.digits) for x in range(20))
-        if formInfo.authenticated_responder:
-            response = Responses(response_code=code, response_to=formInfo, responder_ip=get_client_ip(request),
+        if form_info.authenticated_responder:
+            response = Responses(response_code=code, response_to=form_info, responder_ip=get_client_ip(request),
                                  responder=request.user)
             response.save()
         else:
-            if not formInfo.collect_email:
-                response = Responses(response_code=code, response_to=formInfo, responder_ip=get_client_ip(request))
+            if not form_info.collect_email:
+                response = Responses(response_code=code, response_to=form_info, responder_ip=get_client_ip(request))
                 response.save()
             else:
-                response = Responses(response_code=code, response_to=formInfo, responder_ip=get_client_ip(request),
+                response = Responses(response_code=code, response_to=form_info, responder_ip=get_client_ip(request),
                                      responder_email=request.POST["email-address"])
                 response.save()
+
         for i in request.POST:
             # Excluding csrf token
             if i == "csrfmiddlewaretoken" or i == "email-address":
                 continue
-            question = formInfo.questions.get(id=i)
+            question = form_info.questions.get(id=i)
             for j in request.POST.getlist(i):
                 answer = Answer(answer=j, answer_to=question)
                 answer.save()
                 response.response.add(answer)
                 response.save()
         return render(request, "index/form_response.html", {
-            "form": formInfo,
+            "form": form_info,
             "code": code
         })
 
 
+@login_required
 def responses(request, code):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse("login"))
-    formInfo = Form.objects.filter(code=code)
+    form_info = Form.objects.filter(code=code)
     # Checking if form exists
-    if formInfo.count() == 0:
+    if form_info.count() == 0:
         return HttpResponseRedirect(reverse('404'))
     else:
-        formInfo = formInfo[0]
+        form_info = form_info[0]
     # Checking if form creator is user
-    if formInfo.creator != request.user:
+    if form_info.creator != request.user:
         return HttpResponseRedirect(reverse("403"))
     return render(request, "index/responses.html", {
-        "form": formInfo,
-        "responses": Responses.objects.filter(response_to=formInfo)
+        "form": form_info,
+        "responses": Responses.objects.filter(response_to=form_info)
     })
 
 
 def response(request, code, response_code):
-    formInfo = Form.objects.filter(code=code)
+    form_info = Form.objects.filter(code=code)
     # Checking if form exists
-    if formInfo.count() == 0:
+    if form_info.count() == 0:
         return HttpResponseRedirect(reverse('404'))
     else:
-        formInfo = formInfo[0]
+        form_info = form_info[0]
     # Checking if form creator is user
-    if not formInfo.allow_view_score:
-        if formInfo.creator != request.user:
+    if not form_info.allow_view_score:
+        if form_info.creator != request.user:
             return HttpResponseRedirect(reverse("403"))
     total_score = 0
     score = 0
-    responseInfo = Responses.objects.filter(response_code=response_code)
-    if responseInfo.count() == 0:
+    response_info = Responses.objects.filter(response_code=response_code)
+    if response_info.count() == 0:
         return HttpResponseRedirect(reverse('404'))
     else:
-        responseInfo = responseInfo[0]
-    if formInfo.is_quiz:
-        for i in formInfo.questions.all():
+        response_info = response_info[0]
+    if form_info.is_quiz:
+        for i in form_info.questions.all():
             total_score += i.score
-        for i in responseInfo.response.all():
+        for i in response_info.response.all():
             if i.answer_to.question_type == "short" or i.answer_to.question_type == "paragraph":
                 if i.answer == i.answer_to.answer_key: score += i.answer_to.score
             elif i.answer_to.question_type == "multiple choice":
-                answerKey = None
+                answer_key = None
                 for j in i.answer_to.choices.all():
-                    if j.is_answer: answerKey = j.id
-                if answerKey is not None and int(answerKey) == int(i.answer):
+                    if j.is_answer:
+                        answer_key = j.id
+                if answer_key is not None and int(answer_key) == int(i.answer):
                     score += i.answer_to.score
         _temp = []
-        for i in responseInfo.response.all():
+        for i in response_info.response.all():
             if i.answer_to.question_type == "checkbox" and i.answer_to.pk not in _temp:
                 answers = []
                 answer_keys = []
-                for j in responseInfo.response.filter(answer_to__pk=i.answer_to.pk):
+                for j in response_info.response.filter(answer_to__pk=i.answer_to.pk):
                     answers.append(int(j.answer))
                     for k in j.answer_to.choices.all():
                         if k.is_answer and k.pk not in answer_keys: answer_keys.append(k.pk)
                     _temp.append(i.answer_to.pk)
                 if answers == answer_keys: score += i.answer_to.score
     return render(request, "index/response.html", {
-        "form": formInfo,
-        "response": responseInfo,
+        "form": form_info,
+        "response": response_info,
         "score": score,
         "total_score": total_score
     })
 
 
 def edit_response(request, code, response_code):
-    formInfo = Form.objects.filter(code=code)
+    form_info = Form.objects.filter(code=code)
     # Checking if form exists
-    if formInfo.count() == 0:
+    if form_info.count() == 0:
         return HttpResponseRedirect(reverse('404'))
     else:
-        formInfo = formInfo[0]
-    response = Responses.objects.filter(response_code=response_code, response_to=formInfo)
+        form_info = form_info[0]
+    response = Responses.objects.filter(response_code=response_code, response_to=form_info)
     if response.count() == 0:
         return HttpResponseRedirect(reverse('404'))
     else:
         response = response[0]
-    if formInfo.authenticated_responder:
+    if form_info.authenticated_responder:
         if not request.user.is_authenticated:
-            return HttpResponseRedirect(reverse("login"))
+            return HttpResponseRedirect(reverse("account_login"))
         if response.responder != request.user:
             return HttpResponseRedirect(reverse('403'))
     if request.method == "POST":
-        if formInfo.authenticated_responder and not response.responder:
+        if form_info.authenticated_responder and not response.responder:
             response.responder = request.user
             response.save()
-        if formInfo.collect_email:
+        if form_info.collect_email:
             response.responder_email = request.POST["email-address"]
             response.save()
         # Deleting all existing answers
@@ -639,29 +625,27 @@ def edit_response(request, code, response_code):
             # Excluding csrf token and email address
             if i == "csrfmiddlewaretoken" or i == "email-address":
                 continue
-            question = formInfo.questions.get(id=i)
+            question = form_info.questions.get(id=i)
             for j in request.POST.getlist(i):
                 answer = Answer(answer=j, answer_to=question)
                 answer.save()
                 response.response.add(answer)
                 response.save()
-        if formInfo.is_quiz:
-            return HttpResponseRedirect(reverse("response", args=[formInfo.code, response.response_code]))
+        if form_info.is_quiz:
+            return HttpResponseRedirect(reverse("response", args=[form_info.code, response.response_code]))
         else:
             return render(request, "index/form_response.html", {
-                "form": formInfo,
+                "form": form_info,
                 "code": response.response_code
             })
     return render(request, "index/edit_response.html", {
-        "form": formInfo,
+        "form": form_info,
         "response": response
     })
 
 
+@login_required
 def contact_form_template(request):
-    # Creator must be authenticated
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse("login"))
     # Create a blank form API
     if request.method == "POST":
         code = ''.join(random.choice(string.ascii_letters + string.digits) for x in range(30))
@@ -687,10 +671,8 @@ def contact_form_template(request):
         return JsonResponse({"message": "Sucess", "code": code})
 
 
+@login_required
 def customer_feedback_template(request):
-    # Creator must be authenticated
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse("login"))
     # Create a blank form API
     if request.method == "POST":
         code = ''.join(random.choice(string.ascii_letters + string.digits) for x in range(30))
@@ -730,10 +712,8 @@ def customer_feedback_template(request):
         return JsonResponse({"message": "Sucess", "code": code})
 
 
+@login_required
 def event_registration_template(request):
-    # Creator must be authenticated
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse("login"))
     # Create a blank form API
     if request.method == "POST":
         code = ''.join(random.choice(string.ascii_letters + string.digits) for x in range(30))
@@ -796,20 +776,19 @@ Contact us at (123) 456-7890 or no_reply@example.com", edit_after_submit=True, a
         return JsonResponse({"message": "Sucess", "code": code})
 
 
+@login_required
 def delete_responses(request, code):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse("login"))
-    formInfo = Form.objects.filter(code=code)
+    form_info = Form.objects.filter(code=code)
     # Checking if form exists
-    if formInfo.count() == 0:
+    if form_info.count() == 0:
         return HttpResponseRedirect(reverse('404'))
     else:
-        formInfo = formInfo[0]
+        form_info = form_info[0]
     # Checking if form creator is user
-    if formInfo.creator != request.user:
+    if form_info.creator != request.user:
         return HttpResponseRedirect(reverse("403"))
     if request.method == "DELETE":
-        responses = Responses.objects.filter(response_to=formInfo)
+        responses = Responses.objects.filter(response_to=form_info)
         for response in responses:
             for i in response.response.all():
                 i.delete()
@@ -818,9 +797,9 @@ def delete_responses(request, code):
 
 
 # Error handler
-def FourZeroThree(request):
+def four_zero_three(request):
     return render(request, "error/403.html")
 
 
-def FourZeroFour(request):
+def four_zero_four(request):
     return render(request, "error/404.html")
