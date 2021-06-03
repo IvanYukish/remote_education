@@ -1,10 +1,22 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends "base/base.html" %}
+{% load widget_tweaks %}
+{% load i18n %}
+{% load get_form_by_id %}
 
-</body>
-</html>
+{% block head_title %}{% trans "Lecture list" %}{% endblock %}
+
+{% block content %}
+    <p>{{ object.pk }}</p>
+    <p>{{ object.name }}</p>
+    <p>{{ object.published_at }}</p>
+    <p>{{ object.description }}</p>
+    <p>{{ object.user }}</p>
+
+    <div>
+        <object data="{{ object.pdf_file.url }}" type="application/pdf" width="300" height="200">
+            pdf file <a href="{{ object.pdf_file.url }}">test.pdf</a>
+        </object>
+    </div>
+
+    {#    <img src="{{ object.pdf_file.url }}" alt="{{ object.pdf_file.name }}">#}
+{% endblock %}

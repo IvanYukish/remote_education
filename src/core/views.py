@@ -7,11 +7,14 @@ from django.views.generic import TemplateView, DeleteView, UpdateView, CreateVie
 from core.forms import LectureForm, PracticalLessonForm
 from core.models import Lecture, PracticalLesson
 from core.utils import prepare_date_time_field
-from user.constants import TEACHER
+from user.constants import TEACHER, STUDENT
 
 
-class HomeView(RedirectView):
-    url = reverse_lazy('index')
+class HomeView(LoginRequiredMixin, RedirectView):
+    def get_redirect_url(self, *args, **kwargs):
+        if self.request.user.type == STUDENT:
+            return reverse_lazy('profile')
+        return reverse_lazy('index')
 
 
 class TestPage(TemplateView):
@@ -31,6 +34,8 @@ class LectureListView(LoginRequiredMixin, ListView):
         return context
 
     def get_queryset(self):
+        if self.request.user.type == TEACHER:
+            return self.model.objects.all()
         return self.model.objects.filter(published_at__lt=datetime.datetime.now())
 
 
@@ -111,10 +116,15 @@ class PracticalLessonCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateV
     context_object_name = 'practical_lesson'
     success_url = reverse_lazy('p-lessons-list')
 
+    def form_invalid(self, form):
+        print(form.errors)
+        return super(PracticalLessonCreateView, self).form_invalid(form)
+
     def form_valid(self, form):
         practical_lesson = form.save(commit=False)
         practical_lesson.students = [str(i.id) for i in form.cleaned_data['students']]
         practical_lesson.user = self.request.user
+        print('SUCCESS')
         return super().form_valid(form)
 
     def get_form_kwargs(self):
@@ -145,6 +155,11 @@ class PracticalLessonUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateV
 
     def test_func(self):
         return self.request.user == self.get_object().user
+
+
+class PracticalLessonDetailView(LoginRequiredMixin, DetailView):
+    model = PracticalLesson
+    template_name = 'core/practical_lesson/practical_lesson_detail.html'
 
 
 class PracticalLessonDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):

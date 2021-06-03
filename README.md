@@ -5,7 +5,7 @@
 Clone repository:
 
 ```bash
-git clone https://github.com/IvanYukish/remote_education.git
+git clone https://github.com/NazarKravtshuk/remote_education.git
 ```
 
 Go to the project folder:
